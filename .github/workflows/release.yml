@@ -101,11 +101,10 @@ jobs:
           echo "PKG_CONFIG_PATH=$(brew --prefix openssl)/lib/pkgconfig" >> $GITHUB_ENV
           echo "LIBRARY_PATH=$(brew --prefix openssl)/lib" >> $GITHUB_ENV
 
-      - name: Build and Package with Cross
+      - name: Build and Package (native)
         working-directory: sa
         run: |
-          cargo install cross --git https://github.com/cross-rs/cross
-          cross build --release --target ${{ matrix.target }} --target-dir target
+          cargo build --release --target ${{ matrix.target }} --target-dir target
         env:
           CARGO_TARGET_DIR: target
           RUST_BACKTRACE: full
