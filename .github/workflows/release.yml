@@ -35,14 +35,15 @@ jobs:
 
       - name: Build release binary
         run: |
-          cd sa
+          cd SA
           cargo build --release --target ${{ matrix.target }}
+          cd ..
 
       - name: Archive binary (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
           mkdir -p artifacts
-          cp target/${{ matrix.target }}/release/sa artifacts/
+          cp sa/target/${{ matrix.target }}/release/sa artifacts/
 
       - name: Archive binary (Windows)
         if: runner.os == 'Windows'
