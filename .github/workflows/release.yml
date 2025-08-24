@@ -1,10 +1,13 @@
 name: Release
 
 on:
-  workflow_dispatch:
   push:
-    tags:
-      - "v*.*.*"
+    branches:
+      - main
+    paths:
+      - "sa/**"
+      - ".github/workflows/release.yml"
+  workflow_dispatch:
 
 jobs:
   build:
@@ -34,15 +37,18 @@ jobs:
         run: cargo build --release --target ${{ matrix.target }}
         working-directory: sa
 
-      - name: Archive binary
+      - name: Archive binary (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p artifacts
+          cp target/${{ matrix.target }}/release/sa artifacts/
+
+      - name: Archive binary (Windows)
+        if: runner.os == 'Windows'
         run: |
           mkdir artifacts
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            cp target/${{ matrix.target }}/release/sa.exe artifacts/
-          else
-            cp target/${{ matrix.target }}/release/sa artifacts/
-          fi
-        shell: bash
+          copy target\${{ matrix.target }}\release\sa.exe artifacts\
+        shell: cmd
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -64,7 +70,7 @@ jobs:
       - name: Get latest tag
         id: get_tag
         run: |
-          latest_tag=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           echo "latest_tag=$latest_tag" >> $GITHUB_ENV
 
       - name: Bump version
@@ -93,7 +99,9 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
+          pattern: sa-*
           path: ./artifacts
+          merge-multiple: true
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
