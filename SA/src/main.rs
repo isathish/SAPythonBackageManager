@@ -16,7 +16,12 @@ enum Commands {
     Run {
         #[arg(long)]
         with: String,
-        script: String,
+        #[arg(
+            trailing_var_arg = true,
+            allow_hyphen_values = true,
+            num_args = 1..
+        )]
+        script: Vec<String>,
     },
     /// Add a package to the environment
     Add {
@@ -34,7 +39,7 @@ async fn main() {
 
     match &cli.command {
         Commands::Run { with, script } => {
-            println!("Running script '{}' with dependency '{}'", script, with);
+            println!("Running script {:?} with dependency '{}'", script, with);
             // Simulate dependency installation
             println!("Installing dependency '{}'...", with);
             // Implement actual dependency resolution and installation logic
@@ -99,13 +104,21 @@ async fn main() {
                 .await;
 
             // Simulate running the script
-            println!("Executing script '{}'...", script);
+            println!("Executing script '{:?}'...", script);
             // Implement actual Python execution in a managed environment
             println!("Executing script in managed environment...");
-            let _ = Command::new(".sa_env/bin/python")
-                .arg(script)
-                .status()
-                .await;
+            if !script.is_empty() {
+                let mut cmd = Command::new(".sa_env/bin/python");
+                // Skip the first "python" arg if present to avoid treating it as a file path
+                let args_to_pass = if script.first().map(|s| s == "python").unwrap_or(false) {
+                    script.iter().skip(1).cloned().collect::<Vec<String>>()
+                } else {
+                    script.clone()
+                };
+                cmd.args(args_to_pass);
+                cmd.current_dir(std::env::current_dir().unwrap());
+                let _ = cmd.status().await;
+            }
         }
         Commands::Add { package } => {
             println!("Adding package '{}'", package);
