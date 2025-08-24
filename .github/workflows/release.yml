@@ -89,8 +89,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pkg-config libssl-dev
-          export OPENSSL_DIR=/usr
-          export PKG_CONFIG_PATH=/usr/lib/pkgconfig
           echo "OPENSSL_DIR=/usr" >> $GITHUB_ENV
           echo "PKG_CONFIG_PATH=/usr/lib/pkgconfig" >> $GITHUB_ENV
 
@@ -101,7 +99,6 @@ jobs:
           brew reinstall pkg-config openssl
           echo "OPENSSL_DIR=$(brew --prefix openssl)" >> $GITHUB_ENV
           echo "PKG_CONFIG_PATH=$(brew --prefix openssl)/lib/pkgconfig" >> $GITHUB_ENV
-          export LIBRARY_PATH=$(brew --prefix openssl)/lib
           echo "LIBRARY_PATH=$(brew --prefix openssl)/lib" >> $GITHUB_ENV
 
       - name: Build and Package with Cross
@@ -122,11 +119,11 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           mkdir -p artifacts
-          # Check if binary exists and copy it
-          if [ -f "sa/target/${{ matrix.target }}/release/sa" ]; then
-            cp "sa/target/${{ matrix.target }}/release/sa" artifacts/
+          binary_path="sa/target/${{ matrix.target }}/release/sa"
+          if [ -f "$binary_path" ]; then
+            cp "$binary_path" "artifacts/sa-${{ matrix.target }}"
           else
-            echo "Binary not found at: sa/target/${{ matrix.target }}/release/sa"
+            echo "Binary not found at: $binary_path"
             exit 1
           fi
 
@@ -134,11 +131,11 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           mkdir artifacts
-          # Check if binary exists and copy it
-          if exist "sa\target\${{ matrix.target }}\release\sa.exe" (
-            copy "sa\target\${{ matrix.target }}\release\sa.exe" artifacts\
+          set binary_path=sa\target\${{ matrix.target }}\release\sa.exe
+          if exist "%binary_path%" (
+            copy "%binary_path%" artifacts\sa-${{ matrix.target }}.exe
           ) else (
-            echo "Binary not found at: sa\target\${{ matrix.target }}\release\sa.exe"
+            echo Binary not found at: %binary_path%
             exit 1
           )
         shell: cmd
@@ -148,7 +145,6 @@ jobs:
         with:
           name: sa-${{ matrix.target }}
           path: artifacts/*
-
 
   release:
     name: Create GitHub Release
@@ -169,7 +165,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.bump-version.outputs.new_tag }}
-          files: ./artifacts/**
+          tag_name: ${{ needs.prepare.outputs.new_tag }}
+          files: ./artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUBPATTOKEN }}
