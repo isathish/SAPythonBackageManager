@@ -53,7 +53,7 @@ jobs:
       - name: Build and Package (native)
         working-directory: sa
         run: |
-          cargo build --release --target ${{ matrix.target }} --target-dir target
+          cargo build --release --target-dir target
         env:
           CARGO_TARGET_DIR: target
           RUST_BACKTRACE: full
