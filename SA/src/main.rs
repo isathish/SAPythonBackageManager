@@ -111,10 +111,13 @@ async fn main() {
                 let mut cmd = Command::new(".sa_env/bin/python");
                 // Skip the first "python" arg if present to avoid treating it as a file path
                 let args_to_pass = if script.first().map(|s| s == "python").unwrap_or(false) {
+                    // If first arg is "python", skip it and pass the rest directly
                     script.iter().skip(1).cloned().collect::<Vec<String>>()
                 } else {
                     script.clone()
                 };
+                // If the first arg after skipping is "-c" or other interpreter flag, pass as-is
+                // This ensures `.sa_env/bin/python -c "code"` works without trying to open a file
                 cmd.args(args_to_pass);
                 cmd.current_dir(std::env::current_dir().unwrap());
                 let _ = cmd.status().await;
