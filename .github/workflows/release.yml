@@ -47,13 +47,25 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           mkdir -p artifacts
-          cp sa/target/${{ matrix.target }}/release/sa artifacts/
+          # Check if binary exists and copy it
+          if [ -f "sa/target/${{ matrix.target }}/release/sa" ]; then
+            cp "sa/target/${{ matrix.target }}/release/sa" artifacts/
+          else
+            echo "Binary not found at: sa/target/${{ matrix.target }}/release/sa"
+            exit 1
+          fi
 
       - name: Archive binary (Windows)
         if: runner.os == 'Windows'
         run: |
           mkdir artifacts
-          copy target\${{ matrix.target }}\release\sa.exe artifacts\
+          # Check if binary exists and copy it
+          if exist "sa\target\${{ matrix.target }}\release\sa.exe" (
+            copy "sa\target\${{ matrix.target }}\release\sa.exe" artifacts\
+          ) else (
+            echo "Binary not found at: sa\target\${{ matrix.target }}\release\sa.exe"
+            exit 1
+          )
         shell: cmd
 
       - name: Upload artifact
@@ -72,12 +84,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get latest tag
         id: get_tag
         run: |
+          # Fetch all tags first
+          git fetch --tags
           latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+          echo "Latest tag: $latest_tag"
 
       - name: Bump version
         id: bump
@@ -89,6 +105,7 @@ jobs:
           new_tag="v$major.$minor.$patch"
           echo "new_tag=$new_tag" >> $GITHUB_ENV
           echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
+          echo "New tag: $new_tag"
 
       - name: Create new tag
         run: |
@@ -108,6 +125,9 @@ jobs:
           pattern: sa-*
           path: ./artifacts
           merge-multiple: true
+
+      - name: List downloaded artifacts
+        run: ls -la ./artifacts
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
