@@ -34,8 +34,9 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Build release binary
-        run: cargo build --release --target ${{ matrix.target }}
-        working-directory: sa
+        run: |
+          cd sa
+          cargo build --release --target ${{ matrix.target }}
 
       - name: Archive binary (Linux/macOS)
         if: runner.os != 'Windows'
