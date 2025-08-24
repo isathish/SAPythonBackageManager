@@ -187,29 +187,32 @@ async fn main() {
 
                 let client = Client::new();
                 let url = format!("https://pypi.org/pypi/{}/json", pkg);
-                println!("Fetching metadata from {}", url);
+                // println!("Fetching metadata from {}", url);
                 let resp = client.get(&url).send().await.unwrap();
-                println!("Metadata fetched: {}", resp.status());
+                //println!("Metadata fetched: {}", resp.status());
 
-                println!("Linking '{}' from global cache into environment...", pkg);
+                // println!("Linking '{}' from global cache into environment...", pkg);
 
                 // Fetch and display dependency information
                 if let Ok(meta_json) = resp.json::<serde_json::Value>().await {
-println!("\n📦 {}\n", pkg);
+println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+println!("📦 Package: {}", pkg);
+println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 if let Some(version) = meta_json["info"]["version"].as_str() {
-    println!("├── 📌 Version: {}", version);
+    println!("  📌 Version     : {}", version);
 }
 if let Some(summary) = meta_json["info"]["summary"].as_str() {
-    println!("├── 📝 Summary: {}", summary);
+    println!("  📝 Summary     : {}", summary);
 }
 if let Some(homepage) = meta_json["info"]["home_page"].as_str() {
-    println!("├── 🔗 Homepage: {}", homepage);
+    println!("  🔗 Homepage    : {}", homepage);
 }
+println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 if let Some(requires_dist) = meta_json["info"]["requires_dist"].as_array() {
     if !requires_dist.is_empty() {
-        println!("└── 📦 Dependencies:");
+        println!("  📦 Dependencies:");
         for (i, dep) in requires_dist.iter().enumerate() {
-            let prefix = if i == requires_dist.len() - 1 { "    └──" } else { "    ├──" };
+            let prefix = if i == requires_dist.len() - 1 { "   └──" } else { "   ├──" };
             println!("{} {}", prefix, dep);
 
             // Fetch sub-dependencies for each dependency
@@ -219,7 +222,7 @@ if let Some(requires_dist) = meta_json["info"]["requires_dist"].as_array() {
                     if let Ok(sub_meta) = sub_resp.json::<serde_json::Value>().await {
                         if let Some(sub_requires) = sub_meta["info"]["requires_dist"].as_array() {
                             for (j, sub_dep) in sub_requires.iter().enumerate() {
-                                let sub_prefix = if j == sub_requires.len() - 1 { "        └──" } else { "        ├──" };
+                                let sub_prefix = if j == sub_requires.len() - 1 { "       └──" } else { "       ├──" };
                                 println!("{} {}", sub_prefix, sub_dep);
                             }
                         }
@@ -228,11 +231,12 @@ if let Some(requires_dist) = meta_json["info"]["requires_dist"].as_array() {
             }
         }
     } else {
-        println!("└── ✅ Dependencies: None");
+        println!("  ✅ Dependencies: None");
     }
 } else {
-    println!("└── ✅ Dependencies: None");
+    println!("  ✅ Dependencies: None");
 }
+println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 println!();
                 }
 
