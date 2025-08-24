@@ -193,6 +193,36 @@ async fn main() {
 
                 println!("Linking '{}' from global cache into environment...", pkg);
 
+                // Fetch and display dependency information
+                if let Ok(meta_json) = resp.json::<serde_json::Value>().await {
+println!("\n┌──────────────────────────────────────────────────────────┐");
+println!("│ 📦 Package     │ {:<40} │", pkg);
+println!("├────────────────┼────────────────────────────────────────┤");
+if let Some(version) = meta_json["info"]["version"].as_str() {
+    println!("│ 📌 Version     │ {:<40} │", version);
+}
+if let Some(summary) = meta_json["info"]["summary"].as_str() {
+    println!("│ 📝 Summary     │ {:<40} │", summary);
+}
+if let Some(homepage) = meta_json["info"]["home_page"].as_str() {
+    println!("│ 🔗 Homepage    │ {:<40} │", homepage);
+}
+println!("├────────────────┼────────────────────────────────────────┤");
+if let Some(requires_dist) = meta_json["info"]["requires_dist"].as_array() {
+    if !requires_dist.is_empty() {
+        println!("│ 📦 Dependencies│");
+        for dep in requires_dist {
+            println!("│   • {:<47}│", dep);
+        }
+    } else {
+        println!("│ ✅ Dependencies│ None                                     │");
+    }
+} else {
+    println!("│ ✅ Dependencies│ None                                     │");
+}
+println!("└──────────────────────────────────────────────────────────┘\n");
+                }
+
                 let _ = Command::new(".sa_env/bin/pip")
                     .args(&["install", pkg])
                     .status()

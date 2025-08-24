@@ -50,6 +50,63 @@ SA is a next-generation Python package and environment manager inspired by UV, b
 - [x] Improve error handling
 - [x] Add artifact verification before publishing
 - [x] Cross-platform testing
+- [x] Add GitHub Actions CI/CD for multi-platform release
+- [x] Implement auto-incrementing version and tagging in release workflow
+- [x] Update README automatically with latest version after release
+
+## Installation
+
+You can install **SA** by downloading the latest release binary from the [GitHub Releases](https://github.com/isathish/SAPythonBackageManager/releases) page.
+
+### macOS / Linux
+```bash
+curl -L https://github.com/isathish/SAPythonBackageManager/releases/latest/download/sa -o sa
+chmod +x sa
+sudo mv sa /usr/local/bin/
+```
+
+### Windows (PowerShell)
+```powershell
+Invoke-WebRequest -Uri "https://github.com/isathish/SAPythonBackageManager/releases/latest/download/sa.exe" -OutFile "sa.exe"
+# Add the directory containing sa.exe to your PATH
+```
+
+---
+
+## Usage
+
+### Check Version
+```bash
+sa version
+```
+
+### Add a Package
+```bash
+sa add requests
+```
+
+### Run a Script with Dependencies
+```bash
+sa run --with "requests" python script.py
+```
+
+### Remove a Package
+```bash
+sa remove requests
+```
+
+### List Installed Packages
+```bash
+sa list
+```
+
+### Build and Publish
+```bash
+sa build
+sa publish
+```
+
+---
 
 ## License
 MIT
