@@ -93,8 +93,10 @@ jobs:
         uses: houseabsolute/actions-rust-cross@v0.0.8
         with:
           command: build
-          args: --release --target ${{ matrix.target }}
-          working-directory: sa
+          target: ${{ matrix.target }}
+          args: --release
+        env:
+          CARGO_TARGET_DIR: sa/target
 
       - name: Archive binary (Linux/macOS)
         if: runner.os != 'Windows'
@@ -150,4 +152,4 @@ jobs:
           tag_name: ${{ needs.bump-version.outputs.new_tag }}
           files: ./artifacts/**
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUBPATTOKEN }}
