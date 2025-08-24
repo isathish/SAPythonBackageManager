@@ -38,7 +38,7 @@ async fn main() {
             // Simulate dependency installation
             println!("Installing dependency '{}'...", with);
             // Implement actual dependency resolution and installation logic
-            use std::fs;
+            use std::fs; // std::fs import retained here, duplicate in Build will be removed
             use std::path::Path;
             use reqwest::Client;
             use tokio::process::Command;
@@ -61,7 +61,7 @@ async fn main() {
             let client = Client::new();
             let url = format!("https://pypi.org/pypi/{}/json", with);
             let resp = client.get(&url).send().await.unwrap();
-            let meta: serde_json::Value = resp.json().await.unwrap();
+            let meta: serde_json::Value = resp.json::<serde_json::Value>().await.unwrap();
             if let Some(requires_dist) = meta["info"]["requires_dist"].as_array() {
                 println!("Dependencies found:");
                 for dep in requires_dist {
@@ -165,7 +165,7 @@ async fn main() {
 
             println!("Ensuring reproducible builds with lock file...");
             // Implement lock file generation
-            use std::fs;
+            // Removed duplicate std::fs import
             let lock_content = format!("{{\"build_time\": \"{}\"}}", chrono::Utc::now());
             fs::write("sa.lock", lock_content).unwrap();
             println!("Lock file 'sa.lock' generated.");
