@@ -10,70 +10,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  prepare:
-    name: Prepare Environment
-    runs-on: ubuntu-latest
-    outputs:
-      new_tag: ${{ steps.bump.outputs.new_tag }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get latest tag
-        id: get_tag
-        run: |
-          git fetch --tags
-          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          echo "latest_tag=$latest_tag" >> $GITHUB_ENV
-          echo "Latest tag: $latest_tag"
-
-      - name: Bump version
-        id: bump
-        run: |
-          latest="${{ env.latest_tag }}"
-          latest="${latest#v}"
-          IFS='.' read -r major minor patch <<<"$latest"
-          patch=$((patch + 1))
-          new_tag="v$major.$minor.$patch"
-          echo "new_tag=$new_tag" >> $GITHUB_ENV
-          echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
-          echo "New tag: $new_tag"
-
-      - name: Create new tag
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag ${{ env.new_tag }}
-          git push origin ${{ env.new_tag }}
-
   build:
-    needs: prepare
-    name: Build and Release Binaries
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            runs_on: ubuntu-latest
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            runs_on: ubuntu-latest
-          - os: macos-latest
-            target: x86_64-apple-darwin
-            runs_on: macos-latest
-          - os: macos-latest
-            target: aarch64-apple-darwin
-            runs_on: macos-latest
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            runs_on: windows-latest
-          - os: windows-latest
-            target: aarch64-pc-windows-msvc
-            runs_on: windows-latest
-    runs-on: ${{ matrix.runs_on }}
+    name: Build and Release
+    env:
+      CARGO_TERM_COLOR: always
+      CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG: true
+      RUST_BACKTRACE: full
+      MACOSX_DEPLOYMENT_TARGET: 11.0
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -151,7 +95,7 @@ jobs:
 
   release:
     name: Create GitHub Release
-    needs: [build, prepare]
+    needs: build
     if: ${{ success() }}
     runs-on: ubuntu-latest
     steps:
@@ -165,10 +109,18 @@ jobs:
       - name: List downloaded artifacts
         run: ls -la ./artifacts
 
+      - name: Bump version and create tag
+        id: versioning
+        uses: anothrNick/github-tag-action@1.67.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUBPATTOKEN }}
+          DEFAULT_BUMP: patch
+          WITH_V: true
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.prepare.outputs.new_tag }}
+          tag_name: ${{ steps.versioning.outputs.new_tag }}
           files: ./artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUBPATTOKEN }}
