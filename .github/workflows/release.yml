@@ -102,13 +102,12 @@ jobs:
           echo "LIBRARY_PATH=$(brew --prefix openssl)/lib" >> $GITHUB_ENV
 
       - name: Build and Package with Cross
-        uses: houseabsolute/actions-rust-cross@v0.0.8
-        with:
-          command: build
-          target: ${{ matrix.target }}
-          args: --release --target-dir sa/target
+        working-directory: sa
+        run: |
+          cargo install cross --git https://github.com/cross-rs/cross
+          cross build --release --target ${{ matrix.target }} --target-dir target
         env:
-          CARGO_TARGET_DIR: sa/target
+          CARGO_TARGET_DIR: target
           RUST_BACKTRACE: full
           MACOSX_DEPLOYMENT_TARGET: 11.0
           OPENSSL_DIR: ${{ env.OPENSSL_DIR }}
