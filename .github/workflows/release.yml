@@ -89,9 +89,12 @@ jobs:
           echo "OPENSSL_DIR=/usr" >> $GITHUB_ENV
           echo "PKG_CONFIG_PATH=/usr/lib/pkgconfig" >> $GITHUB_ENV
 
-      - name: Build release binary
-        run: cargo build --release --target ${{ matrix.target }}
-        working-directory: sa
+      - name: Build and Package with Cross
+        uses: houseabsolute/actions-rust-cross@v0.0.8
+        with:
+          command: build
+          args: --release --target ${{ matrix.target }}
+          working-directory: sa
 
       - name: Archive binary (Linux/macOS)
         if: runner.os != 'Windows'
