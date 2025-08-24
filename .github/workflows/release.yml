@@ -66,9 +66,9 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           mkdir -p artifacts
-          binary_path="sa/target/${{ matrix.target }}/release/sa"
+          binary_path="sa/target/release/sa"
           if [ -f "$binary_path" ]; then
-            cp "$binary_path" "artifacts/sa-${{ matrix.target }}"
+            cp "$binary_path" "artifacts/sa"
           else
             echo "Binary not found at: $binary_path"
             exit 1
