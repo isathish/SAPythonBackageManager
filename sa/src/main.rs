@@ -195,32 +195,45 @@ async fn main() {
 
                 // Fetch and display dependency information
                 if let Ok(meta_json) = resp.json::<serde_json::Value>().await {
-println!("\n┌──────────────────────────────────────────────────────────┐");
-println!("│ 📦 Package     │ {:<40} │", pkg);
-println!("├────────────────┼────────────────────────────────────────┤");
+println!("\n📦 {}\n", pkg);
 if let Some(version) = meta_json["info"]["version"].as_str() {
-    println!("│ 📌 Version     │ {:<40} │", version);
+    println!("├── 📌 Version: {}", version);
 }
 if let Some(summary) = meta_json["info"]["summary"].as_str() {
-    println!("│ 📝 Summary     │ {:<40} │", summary);
+    println!("├── 📝 Summary: {}", summary);
 }
 if let Some(homepage) = meta_json["info"]["home_page"].as_str() {
-    println!("│ 🔗 Homepage    │ {:<40} │", homepage);
+    println!("├── 🔗 Homepage: {}", homepage);
 }
-println!("├────────────────┼────────────────────────────────────────┤");
 if let Some(requires_dist) = meta_json["info"]["requires_dist"].as_array() {
     if !requires_dist.is_empty() {
-        println!("│ 📦 Dependencies│");
-        for dep in requires_dist {
-            println!("│   • {:<47}│", dep);
+        println!("└── 📦 Dependencies:");
+        for (i, dep) in requires_dist.iter().enumerate() {
+            let prefix = if i == requires_dist.len() - 1 { "    └──" } else { "    ├──" };
+            println!("{} {}", prefix, dep);
+
+            // Fetch sub-dependencies for each dependency
+            if let Some(dep_name) = dep.as_str().and_then(|d| d.split_whitespace().next()) {
+                let sub_url = format!("https://pypi.org/pypi/{}/json", dep_name);
+                if let Ok(sub_resp) = client.get(&sub_url).send().await {
+                    if let Ok(sub_meta) = sub_resp.json::<serde_json::Value>().await {
+                        if let Some(sub_requires) = sub_meta["info"]["requires_dist"].as_array() {
+                            for (j, sub_dep) in sub_requires.iter().enumerate() {
+                                let sub_prefix = if j == sub_requires.len() - 1 { "        └──" } else { "        ├──" };
+                                println!("{} {}", sub_prefix, sub_dep);
+                            }
+                        }
+                    }
+                }
+            }
         }
     } else {
-        println!("│ ✅ Dependencies│ None                                     │");
+        println!("└── ✅ Dependencies: None");
     }
 } else {
-    println!("│ ✅ Dependencies│ None                                     │");
+    println!("└── ✅ Dependencies: None");
 }
-println!("└──────────────────────────────────────────────────────────┘\n");
+println!();
                 }
 
                 let _ = Command::new(".sa_env/bin/pip")
