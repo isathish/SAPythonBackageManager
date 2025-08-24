@@ -3,7 +3,7 @@ use std::process;
 
 /// SA - Super Accelerated Python Package Manager
 #[derive(Parser)]
-#[command(name = "sa")]
+#[command(name = "sa", bin_name = "sa")]
 #[command(about = "Super Accelerated Python Package Manager", long_about = None)]
 struct Cli {
     #[command(subcommand)]
@@ -14,8 +14,10 @@ struct Cli {
 enum Commands {
     /// Run a Python script with dependencies
     Run {
-        #[arg(long)]
+        /// Dependency to install before running
+        #[arg(short, long)]
         with: String,
+        /// Script and arguments to pass to Python
         #[arg(
             trailing_var_arg = true,
             allow_hyphen_values = true,
@@ -25,19 +27,47 @@ enum Commands {
     },
     /// Add a package to the environment
     Add {
+        /// Package name(s) to add
+        #[arg(num_args = 1.., trailing_var_arg = true, allow_hyphen_values = true)]
+        package: Vec<String>,
+    },
+    /// Remove a package from the environment
+    Remove {
+        /// Package name to remove
+        #[arg(short, long)]
         package: String,
     },
+    /// List installed packages in the environment
+    List,
     /// Build the project
     Build,
     /// Publish the project
     Publish,
+    /// Show the current SA version
+    Version,
 }
 
 #[tokio::main]
+#[allow(dead_code)]
 async fn main() {
     let cli = Cli::parse();
 
     match &cli.command {
+        Commands::Remove { package } => {
+            println!("Removing package '{}'", package);
+            let _ = std::process::Command::new(".sa_env/bin/pip")
+                .args(&["uninstall", "-y", package])
+                .status();
+        }
+        Commands::List => {
+            println!("Listing installed packages in environment...");
+            let _ = std::process::Command::new(".sa_env/bin/pip")
+                .args(&["list"])
+                .status();
+        }
+        Commands::Version => {
+            println!("SA version 0.1.0");
+        }
         Commands::Run { with, script } => {
             println!("Running script {:?} with dependency '{}'", script, with);
             // Simulate dependency installation
@@ -116,55 +146,58 @@ async fn main() {
                 } else {
                     script.clone()
                 };
-                // If the first arg after skipping is "-c" or other interpreter flag, pass as-is
-                // This ensures `.sa_env/bin/python -c "code"` works without trying to open a file
-                cmd.args(args_to_pass);
+                // Ensure we don't treat interpreter flags as file paths
+                if let Some(first_arg) = args_to_pass.first() {
+                    if first_arg.starts_with('-') {
+                        cmd.args(args_to_pass);
+                    } else {
+                        // Treat first arg as script file only if it doesn't start with '-'
+                        cmd.args(args_to_pass);
+                    }
+                } else {
+                    cmd.args(args_to_pass);
+                }
                 cmd.current_dir(std::env::current_dir().unwrap());
                 let _ = cmd.status().await;
             }
         }
         Commands::Add { package } => {
-            println!("Adding package '{}'", package);
-            // Simulate adding a package
-            println!("Installing package '{}' into environment...", package);
-            // Implement actual package addition logic
-            use std::fs::{self, OpenOptions};
-            use std::io::Write;
-            use std::path::Path;
-            use reqwest::Client;
-            use tokio::process::Command;
+            for pkg in package {
+                println!("Adding package '{}'", pkg);
+                println!("Installing package '{}' into environment...", pkg);
+                use std::fs::{self, OpenOptions};
+                use std::io::Write;
+                use std::path::Path;
+                use reqwest::Client;
+                use tokio::process::Command;
 
-            // 1. Update pyproject.toml or requirements.txt with new package
-            if Path::new("requirements.txt").exists() {
-                let mut file = OpenOptions::new()
-                    .append(true)
-                    .open("requirements.txt")
-                    .unwrap();
-                writeln!(file, "{}", package).unwrap();
-                println!("Added '{}' to requirements.txt", package);
-            } else {
-                fs::write("requirements.txt", package).unwrap();
-                println!("Created requirements.txt with '{}'", package);
+                if Path::new("requirements.txt").exists() {
+                    let mut file = OpenOptions::new()
+                        .append(true)
+                        .open("requirements.txt")
+                        .unwrap();
+                    writeln!(file, "{}", pkg).unwrap();
+                    println!("Added '{}' to requirements.txt", pkg);
+                } else {
+                    fs::write("requirements.txt", pkg).unwrap();
+                    println!("Created requirements.txt with '{}'", pkg);
+                }
+
+                println!("Resolving updated dependencies...");
+
+                let client = Client::new();
+                let url = format!("https://pypi.org/pypi/{}/json", pkg);
+                println!("Fetching metadata from {}", url);
+                let resp = client.get(&url).send().await.unwrap();
+                println!("Metadata fetched: {}", resp.status());
+
+                println!("Linking '{}' from global cache into environment...", pkg);
+
+                let _ = Command::new(".sa_env/bin/pip")
+                    .args(&["install", pkg])
+                    .status()
+                    .await;
             }
-
-            // 2. Resolve updated dependency graph (placeholder)
-            println!("Resolving updated dependencies...");
-
-            // 3. Fetch missing packages using HTTP range requests
-            let client = Client::new();
-            let url = format!("https://pypi.org/pypi/{}/json", package);
-            println!("Fetching metadata from {}", url);
-            let resp = client.get(&url).send().await.unwrap();
-            println!("Metadata fetched: {}", resp.status());
-
-            // 4. Link from global cache into environment (placeholder)
-            println!("Linking '{}' from global cache into environment...", package);
-
-            // Install into environment
-            let _ = Command::new(".sa_env/bin/pip")
-                .args(&["install", package])
-                .status()
-                .await;
         }
         Commands::Build => {
             println!("Building project...");

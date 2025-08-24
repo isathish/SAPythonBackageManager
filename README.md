@@ -39,17 +39,17 @@ SA is a next-generation Python package and environment manager inspired by UV, b
 - [x] Add dependency resolution engine (basic resolver with PyPI metadata parsing)
 - [x] Implement package fetching with HTTP range requests
 - [x] Add global cache and hard linking
-- [ ] Implement advanced dependency resolution with full graph and version constraints
-- [ ] Implement Python version management (download, install, switch)
+- [x] Implement advanced dependency resolution with full graph and version constraints (initial version)
+- [x] Implement Python version management (download, install, switch)
 - [x] Implement build and publish commands
 - [x] Add lock file support (basic, with build timestamp)
-- [ ] Enhance lock file to store full dependency graph with versions and hashes
-- [ ] Implement cross-platform path handling
-- [ ] Add multiple index support
-- [ ] Implement parallel installations
-- [ ] Improve error handling
-- [ ] Add artifact verification before publishing
-- [ ] Cross-platform testing
+- [x] Enhance lock file to store full dependency graph with versions and hashes
+- [x] Implement cross-platform path handling
+- [x] Add multiple index support
+- [x] Implement parallel installations
+- [x] Improve error handling
+- [x] Add artifact verification before publishing
+- [x] Cross-platform testing
 
 ## License
 MIT
