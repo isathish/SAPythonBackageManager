@@ -106,13 +106,14 @@ jobs:
         with:
           command: build
           target: ${{ matrix.target }}
-          args: --release
+          args: --release --target-dir sa/target
         env:
           CARGO_TARGET_DIR: sa/target
           RUST_BACKTRACE: full
-          MACOSX_DEPLOYMENT_TARGET: 10.13
+          MACOSX_DEPLOYMENT_TARGET: 11.0
           OPENSSL_DIR: ${{ env.OPENSSL_DIR }}
           PKG_CONFIG_PATH: ${{ env.PKG_CONFIG_PATH }}
+          RUSTFLAGS: "-C target-cpu=native"
 
       - name: Archive binary (Linux/macOS)
         if: runner.os != 'Windows'
