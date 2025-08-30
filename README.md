@@ -4,15 +4,15 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust](https://img.shields.io/badge/built_with-Rust-dea584.svg)](https://www.rust-lang.org/)
-[![Cross Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey)](https://github.com/sathishkumarn/SAPythonPackageManager/releases)
-[![GitHub release](https://img.shields.io/github/v/release/sathishkumarn/SAPythonPackageManager?include_prereleases)](https://github.com/sathishkumarn/SAPythonPackageManager/releases)
-[![Build Status](https://github.com/sathishkumarn/SAPythonPackageManager/workflows/Release/badge.svg)](https://github.com/sathishkumarn/SAPythonPackageManager/actions)
+[![Cross Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey)](https://github.com/isathish/SAPythonPackageManager/releases)
+[![GitHub release](https://img.shields.io/github/v/release/isathish/SAPythonPackageManager?include_prereleases)](https://github.com/isathish/SAPythonPackageManager/releases)
+
 
 **The fastest, most modern Python package manager built with Rust**
 
 *Lightning-fast dependency resolution • Automatic virtual environments • Zero Python required*
 
-[📖 **Documentation**](https://isathish.github.io/SAPythonPackageManager/) • [🚀 **Quick Start**](#-quick-start) • [💾 **Download**](https://github.com/sathishkumarn/SAPythonPackageManager/releases/latest) • [🐛 **Report Bug**](https://github.com/sathishkumarn/SAPythonPackageManager/issues)
+[📖 **Documentation**](https://isathish.github.io/SAPythonPackageManager/) • [🚀 **Quick Start**](#-quick-start) • [💾 **Download**](https://github.com/isathish/SAPythonPackageManager/releases/latest) • [🐛 **Report Bug**](https://github.com/isathish/SAPythonPackageManager/issues)
 
 
 
@@ -47,7 +47,7 @@ Choose your platform and run the appropriate command:
 <summary><strong>🐧 Linux (x86_64)</strong></summary>
 
 ```bash
-curl -L -o sa https://github.com/sathishkumarn/SAPythonPackageManager/releases/latest/download/sa-x86_64-unknown-linux-gnu
+curl -L -o sa https://github.com/isathish/SAPythonPackageManager/releases/latest/download/sa-x86_64-unknown-linux-gnu
 chmod +x sa
 sudo mv sa /usr/local/bin/
 ```
@@ -59,13 +59,13 @@ sudo mv sa /usr/local/bin/
 
 **Intel Macs:**
 ```bash
-curl -L -o sa https://github.com/sathishkumarn/SAPythonPackageManager/releases/latest/download/sa-x86_64-apple-darwin
+curl -L -o sa https://github.com/isathish/SAPythonPackageManager/releases/latest/download/sa-x86_64-apple-darwin
 chmod +x sa && sudo mv sa /usr/local/bin/
 ```
 
 **Apple Silicon (M1/M2/M3):**
 ```bash
-curl -L -o sa https://github.com/sathishkumarn/SAPythonPackageManager/releases/latest/download/sa-aarch64-apple-darwin
+curl -L -o sa https://github.com/isathish/SAPythonPackageManager/releases/latest/download/sa-aarch64-apple-darwin
 chmod +x sa && sudo mv sa /usr/local/bin/
 ```
 
@@ -76,7 +76,7 @@ chmod +x sa && sudo mv sa /usr/local/bin/
 
 **PowerShell:**
 ```powershell
-Invoke-WebRequest -Uri "https://github.com/sathishkumarn/SAPythonPackageManager/releases/latest/download/sa-x86_64-pc-windows-msvc.exe" -OutFile "sa.exe"
+Invoke-WebRequest -Uri "https://github.com/isathish/SAPythonPackageManager/releases/latest/download/sa-x86_64-pc-windows-msvc.exe" -OutFile "sa.exe"
 # Move to a directory in your PATH
 ```
 
@@ -86,7 +86,7 @@ Invoke-WebRequest -Uri "https://github.com/sathishkumarn/SAPythonPackageManager/
 <summary><strong>📦 From Source</strong></summary>
 
 ```bash
-git clone https://github.com/sathishkumarn/SAPythonPackageManager.git
+git clone https://github.com/isathish/SAPythonPackageManager.git
 cd SAPythonPackageManager/sa
 cargo build --release
 sudo cp target/release/sa /usr/local/bin/
@@ -234,7 +234,7 @@ SA significantly outperforms traditional Python package managers:
 
 ```bash
 # Clone the repository
-git clone https://github.com/sathishkumarn/SAPythonPackageManager.git
+git clone https://github.com/isathish/SAPythonPackageManager.git
 cd SAPythonPackageManager/sa
 
 # Build debug version
@@ -267,14 +267,14 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 ### Get Help
 
 - 📖 **[Documentation](https://isathish.github.io/SAPythonPackageManager/)** - Complete guides and tutorials
-- 🐛 **[Issues](https://github.com/sathishkumarn/SAPythonPackageManager/issues)** - Bug reports and feature requests
-- 💬 **[Discussions](https://github.com/sathishkumarn/SAPythonPackageManager/discussions)** - Community discussions and Q&A
+- 🐛 **[Issues](https://github.com/isathish/SAPythonPackageManager/issues)** - Bug reports and feature requests
+- 💬 **[Discussions](https://github.com/isathish/SAPythonPackageManager/discussions)** - Community discussions and Q&A
 - 📧 **Email** - [support@sa-pm.dev](mailto:support@sa-pm.dev)
 
 ### Contributing
 
-- 🔄 **[Pull Requests](https://github.com/sathishkumarn/SAPythonPackageManager/pulls)** - Code contributions
-- 📋 **[Good First Issues](https://github.com/sathishkumarn/SAPythonPackageManager/labels/good%20first%20issue)** - Beginner-friendly tasks
+- 🔄 **[Pull Requests](https://github.com/isathish/SAPythonPackageManager/pulls)** - Code contributions
+- 📋 **[Good First Issues](https://github.com/isathish/SAPythonPackageManager/labels/good%20first%20issue)** - Beginner-friendly tasks
 - 📝 **[Contributing Guide](CONTRIBUTING.md)** - Detailed contribution guidelines
 
 ---
