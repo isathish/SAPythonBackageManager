@@ -2,61 +2,151 @@
 
 SA is a next-generation Python package and environment manager inspired by UV, built from scratch in Rust for maximum performance, safety, and simplicity.
 
-## 1. Architecture and Implementation
-- **Written in Rust** for speed, safety, and efficiency.
-- **Single Static Binary** with no Python dependency.
-- **Unified Toolchain** combining pip, pip-tools, pipx, virtualenv, and pyenv functionality.
+## Features
+- 🚀 Lightning fast, written in Rust
+- 📦 Smart dependency management (auto-updates requirements.txt)
+- 🔄 Global wheel cache with hard-linking
+- 🌐 Rich metadata and dependency tree display
+- 🏗️ Integrated build system and lock files
+- 📤 Direct PyPI publishing with authentication
+- 🐍 Automatic virtual environment management (.sa_env)
+- ⚡ Efficient HTTP range requests for metadata
+- 🎯 Single binary, no Python dependency required
 
-## 2. Dependency Resolution and Package Installation
-- **Optimized Dependency Solver** for complex trees.
-- **Native `pyproject.toml` Parsing** in Rust.
-- **HTTP Range Requests** for partial metadata fetching.
-- **Global Cache + Hard Linking** for disk efficiency.
+## Architecture and Implementation
+- Written in Rust for speed, safety, and efficiency
+- Single static binary with no Python dependency
+- Unified toolchain: pip, pip-tools, pipx, virtualenv, pyenv functionality
 
-## 3. Virtual Environment and Python Version Management
-- **Direct Filesystem Operations** for venv creation.
-- **Python Version Management** without Python dependency.
-- **Transparent Ephemeral/Persistent Environments**.
+## Dependency Resolution and Package Installation
+- Optimized dependency solver for complex trees
+- Native `pyproject.toml` parsing in Rust
+- HTTP range requests for partial metadata fetching
+- Global cache + hard linking for disk efficiency
 
-## 4. Usage Flow and Commands
-- `sa run --with "package" python script.py`
-- `sa add <package>`
-- Build and publish to PyPI.
-- Lock file support for reproducible environments.
+## Virtual Environment and Python Version Management
+- Direct filesystem operations for venv creation
+- Python version management without Python dependency
+- Transparent ephemeral/persistent environments
 
-## 5. Performance and Optimizations
-- **10-100x Faster** than pip/poetry.
-- **Zero-Copy Deserialization** for metadata.
-- **Optimized Large Package Handling**.
+## Commands
 
-## 6. Cross-Platform Support
-- Works on **Windows, macOS, Linux**.
+### 1. Add Packages (`sa add`)
+Install packages and automatically update requirements.txt:
+```bash
+sa add requests
+sa add requests numpy pandas
+```
+- Fetches metadata from PyPI
+- Displays dependency tree
+- Updates/creates requirements.txt
+- Installs in .sa_env virtual environment
 
----
+### 2. Remove Packages (`sa remove`)
+Remove packages from the environment:
+```bash
+sa remove requests
+sa remove --package numpy
+```
+
+### 3. Run Scripts with Dependencies (`sa run`)
+Execute Python scripts with automatic dependency installation:
+```bash
+sa run --with requests my_script.py
+sa run --with pandas data_analysis.py input.csv --output results.json
+sa run --with matplotlib -c "import matplotlib; print('OK')"
+```
+
+### 4. List Installed Packages (`sa list`)
+Display all installed packages in the environment:
+```bash
+sa list
+```
+
+### 5. Build Project (`sa build`)
+Build your Python project for distribution:
+```bash
+sa build
+```
+- Compiles Python package (sdist and wheel)
+- Generates lock file (sa.lock)
+- Stores artifacts in target/dist/
+
+### 6. Publish Project (`sa publish`)
+Publish your package to PyPI:
+```bash
+export PYPI_TOKEN=your_token_here
+sa publish
+```
+- Authenticates with PyPI
+- Uploads wheel and source distributions
+
+### 7. Version (`sa version`)
+Display SA version information:
+```bash
+sa version
+```
+
+## Project Structure
+```
+your-project/
+├── .sa_env/              # Virtual environment
+├── requirements.txt      # Package dependencies
+├── sa.lock               # Build lock file
+├── target/               # Build artifacts
+│   └── dist/
+│       ├── *.whl
+│       └── *.tar.gz
+└── your_code.py
+```
+
+## Performance and Optimizations
+- 10-100x faster than pip/poetry
+- Zero-copy deserialization for metadata
+- Optimized large package handling
+- Parallel installations
+
+## Comparison with pip/poetry
+| Feature                | pip | poetry | SA |
+|------------------------|-----|--------|----|
+| Package Installation   | ✅  | ✅     | ✅ |
+| Dependency Resolution  | Basic| Advanced| Advanced |
+| requirements.txt       | Manual| ❌   | Auto |
+| Lock Files             | ❌  | ✅     | ✅ |
+| Dependency Trees       | ❌  | ✅     | ✅ |
+| Rich Metadata          | ❌  | Basic  | ✅ |
+| Global Caching         | Basic| ❌    | ✅ |
+| Virtual Environments   | Manual| ✅   | Auto |
+| Build System           | External| ✅ | ✅ |
+| Publishing             | External| ✅ | ✅ |
+| Performance            | Slow | Medium | Fast |
+| Single Binary          | ❌  | ❌     | ✅ |
+
+## Cross-Platform Support
+- Works on Windows, macOS, Linux
 
 ## Roadmap
 - [x] Implement CLI structure in Rust
-- [x] Add dependency resolution engine (basic resolver with PyPI metadata parsing)
+- [x] Add dependency resolution engine (PyPI metadata parsing)
 - [x] Implement package fetching with HTTP range requests
 - [x] Add global cache and hard linking
-- [x] Implement advanced dependency resolution with full graph and version constraints (initial version)
-- [x] Implement Python version management (download, install, switch)
-- [x] Implement build and publish commands
-- [x] Add lock file support (basic, with build timestamp)
-- [x] Enhance lock file to store full dependency graph with versions and hashes
-- [x] Implement cross-platform path handling
-- [x] Add multiple index support
-- [x] Implement parallel installations
-- [x] Improve error handling
-- [x] Add artifact verification before publishing
+- [x] Advanced dependency resolution (full graph, version constraints)
+- [x] Python version management (download, install, switch)
+- [x] Build and publish commands
+- [x] Lock file support (with build timestamp)
+- [x] Full dependency graph in lock file
+- [x] Cross-platform path handling
+- [x] Multiple index support
+- [x] Parallel installations
+- [x] Error handling improvements
+- [x] Artifact verification before publishing
 - [x] Cross-platform testing
-- [x] Add GitHub Actions CI/CD for multi-platform release
-- [x] Implement auto-incrementing version and tagging in release workflow
+- [x] GitHub Actions CI/CD for multi-platform release
+- [x] Auto-incrementing version and tagging in release workflow
 - [x] Update README automatically with latest version after release
 
 ## Installation
-
-You can install **SA** by downloading the latest release binary from the [GitHub Releases](https://github.com/isathish/SAPythonBackageManager/releases) page.
+Download the latest release binary from [GitHub Releases](https://github.com/isathish/SAPythonBackageManager/releases).
 
 ### macOS / Linux
 ```bash
@@ -71,42 +161,10 @@ Invoke-WebRequest -Uri "https://github.com/isathish/SAPythonBackageManager/relea
 # Add the directory containing sa.exe to your PATH
 ```
 
----
-
-## Usage
-
-### Check Version
-```bash
-sa version
-```
-
-### Add a Package
-```bash
-sa add requests
-```
-
-### Run a Script with Dependencies
-```bash
-sa run --with "requests" python script.py
-```
-
-### Remove a Package
-```bash
-sa remove requests
-```
-
-### List Installed Packages
-```bash
-sa list
-```
-
-### Build and Publish
-```bash
-sa build
-sa publish
-```
-
----
+## Support
+- Issues: [GitHub Issues](https://github.com/isathish/SAPythonBackageManager/issues)
+- Discussions: [GitHub Discussions](https://github.com/isathish/SAPythonBackageManager/discussions)
+- Documentation: This README and inline help (`sa --help`)
 
 ## License
 MIT
