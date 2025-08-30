@@ -12,12 +12,28 @@ on:
 jobs:
   build:
     name: Build and Release
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            binary_suffix: ""
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            binary_suffix: ""
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            binary_suffix: ""
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            binary_suffix: ".exe"
+
     env:
       CARGO_TERM_COLOR: always
       CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG: true
       RUST_BACKTRACE: full
       MACOSX_DEPLOYMENT_TARGET: 11.0
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout repository
@@ -29,7 +45,7 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Install OpenSSL (Linux only)
-        if: runner.os == 'Linux'
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y pkg-config libssl-dev
@@ -42,50 +58,50 @@ jobs:
           echo "PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig" >> $GITHUB_ENV
 
       - name: Install dependencies (macOS)
-        if: runner.os == 'macOS'
+        if: matrix.os == 'macos-latest'
         run: |
           brew update
-          brew reinstall pkg-config openssl
+          brew install pkg-config openssl
           echo "OPENSSL_DIR=$(brew --prefix openssl)" >> $GITHUB_ENV
           echo "PKG_CONFIG_PATH=$(brew --prefix openssl)/lib/pkgconfig" >> $GITHUB_ENV
           echo "LIBRARY_PATH=$(brew --prefix openssl)/lib" >> $GITHUB_ENV
 
-      - name: Build and Package (native)
+      - name: Build for target
         working-directory: sa
-        run: |
-          cargo build --release --target-dir target
+        run: cargo build --release --target ${{ matrix.target }}
         env:
-          CARGO_TARGET_DIR: target
           RUST_BACKTRACE: full
           MACOSX_DEPLOYMENT_TARGET: 11.0
           OPENSSL_DIR: ${{ env.OPENSSL_DIR }}
           PKG_CONFIG_PATH: ${{ env.PKG_CONFIG_PATH }}
-          RUSTFLAGS: "-C target-cpu=native"
 
-      - name: Archive binary (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Archive binary (Unix)
+        if: matrix.os != 'windows-latest'
         run: |
           mkdir -p artifacts
-          binary_path="sa/target/release/sa"
+          binary_path="sa/target/${{ matrix.target }}/release/sa"
           if [ -f "$binary_path" ]; then
-            cp "$binary_path" "artifacts/sa"
+            cp "$binary_path" "artifacts/sa-${{ matrix.target }}"
+            chmod +x "artifacts/sa-${{ matrix.target }}"
           else
             echo "Binary not found at: $binary_path"
+            find sa/target -name "sa" -type f
             exit 1
           fi
 
       - name: Archive binary (Windows)
-        if: runner.os == 'Windows'
+        if: matrix.os == 'windows-latest'
         run: |
           mkdir artifacts
-          set binary_path=sa\target\${{ matrix.target }}\release\sa.exe
-          if exist "%binary_path%" (
-            copy "%binary_path%" artifacts\sa-${{ matrix.target }}.exe
-          ) else (
-            echo Binary not found at: %binary_path%
+          $binary_path = "sa\target\${{ matrix.target }}\release\sa.exe"
+          if (Test-Path $binary_path) {
+            Copy-Item $binary_path "artifacts\sa-${{ matrix.target }}.exe"
+          } else {
+            Write-Host "Binary not found at: $binary_path"
+            Get-ChildItem sa\target -Recurse -Name "sa.exe"
             exit 1
-          )
-        shell: cmd
+          }
+        shell: powershell
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -99,6 +115,9 @@ jobs:
     if: ${{ success() }}
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -113,7 +132,7 @@ jobs:
         id: versioning
         uses: anothrNick/github-tag-action@1.67.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUBPATTOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
           WITH_V: true
 
@@ -122,5 +141,23 @@ jobs:
         with:
           tag_name: ${{ steps.versioning.outputs.new_tag }}
           files: ./artifacts/*
+          name: "SA Python Package Manager ${{ steps.versioning.outputs.new_tag }}"
+          body: |
+            ## What's Changed
+            - Automated release of SA Python Package Manager
+            - Cross-platform binaries for Linux, macOS (Intel & Apple Silicon), and Windows
+            
+            ## Download
+            Choose the appropriate binary for your platform:
+            - **Linux (x86_64)**: `sa-x86_64-unknown-linux-gnu`
+            - **macOS (Intel)**: `sa-x86_64-apple-darwin`  
+            - **macOS (Apple Silicon)**: `sa-aarch64-apple-darwin`
+            - **Windows**: `sa-x86_64-pc-windows-msvc.exe`
+            
+            ## Installation
+            1. Download the binary for your platform
+            2. Rename it to `sa` (or `sa.exe` on Windows)
+            3. Make it executable: `chmod +x sa` (Unix systems)
+            4. Move to a directory in your PATH
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUBPATTOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
