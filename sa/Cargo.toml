@@ -1,7 +1,12 @@
 [package]
 name = "sa"
+<<<<<<< HEAD
 version = "0.1.0"
 edition = "2021"
+=======
+version = "0.0.7"
+edition = "2024"
+>>>>>>> 476881f6607f35272e054b7f324583281c0dff29
 
 [dependencies]
 chrono = { version = "0.4.41", features = ["serde"] }
