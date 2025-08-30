@@ -83,6 +83,7 @@ jobs:
           if [ -f "$binary_path" ]; then
             cp "$binary_path" "artifacts/sa-${{ matrix.target }}"
             chmod +x "artifacts/sa-${{ matrix.target }}"
+            ls -la artifacts/
           else
             echo "Binary not found at: $binary_path"
             find sa/target -name "sa" -type f
@@ -96,6 +97,7 @@ jobs:
           $binary_path = "sa\target\${{ matrix.target }}\release\sa.exe"
           if (Test-Path $binary_path) {
             Copy-Item $binary_path "artifacts\sa-${{ matrix.target }}.exe"
+            Get-ChildItem artifacts
           } else {
             Write-Host "Binary not found at: $binary_path"
             Get-ChildItem sa\target -Recurse -Name "sa.exe"
@@ -107,7 +109,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sa-${{ matrix.target }}
-          path: artifacts/*
+          path: artifacts/sa-${{ matrix.target }}${{ matrix.binary_suffix }}
+          if-no-files-found: error
 
   release:
     name: Create GitHub Release
@@ -118,15 +121,63 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download all artifacts
+      - name: Download Linux artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: sa-*
-          path: ./artifacts
-          merge-multiple: true
+          name: sa-x86_64-unknown-linux-gnu
+          path: ./artifacts/
+
+      - name: Download macOS Intel artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sa-x86_64-apple-darwin
+          path: ./artifacts/
+
+      - name: Download macOS Apple Silicon artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sa-aarch64-apple-darwin
+          path: ./artifacts/
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sa-x86_64-pc-windows-msvc
+          path: ./artifacts/
 
       - name: List downloaded artifacts
-        run: ls -la ./artifacts
+        run: |
+          echo "Listing all downloaded artifacts:"
+          find ./artifacts -type f -exec ls -la {} \;
+          echo "Total artifacts found:"
+          find ./artifacts -type f | wc -l
+
+      - name: Verify all artifacts exist
+        run: |
+          expected_files=(
+            "./artifacts/sa-x86_64-unknown-linux-gnu"
+            "./artifacts/sa-x86_64-apple-darwin"
+            "./artifacts/sa-aarch64-apple-darwin"
+            "./artifacts/sa-x86_64-pc-windows-msvc.exe"
+          )
+          
+          all_found=true
+          for file in "${expected_files[@]}"; do
+            if [ -f "$file" ]; then
+              echo "✅ Found: $file"
+              file_size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "unknown")
+              echo "   Size: $file_size bytes"
+            else
+              echo "❌ Missing: $file"
+              all_found=false
+            fi
+          done
+          
+          if [ "$all_found" = false ]; then
+            echo "Some artifacts are missing. Exiting..."
+            exit 1
+          fi
+          echo "All artifacts verified successfully!"
 
       - name: Bump version and create tag
         id: versioning
@@ -140,7 +191,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.versioning.outputs.new_tag }}
-          files: ./artifacts/*
+          files: |
+            ./artifacts/sa-x86_64-unknown-linux-gnu
+            ./artifacts/sa-x86_64-apple-darwin
+            ./artifacts/sa-aarch64-apple-darwin
+            ./artifacts/sa-x86_64-pc-windows-msvc.exe
           name: "SA Python Package Manager ${{ steps.versioning.outputs.new_tag }}"
           body: |
             ## What's Changed
@@ -159,5 +214,20 @@ jobs:
             2. Rename it to `sa` (or `sa.exe` on Windows)
             3. Make it executable: `chmod +x sa` (Unix systems)
             4. Move to a directory in your PATH
+            
+            ## File Checksums
+            You can verify the integrity of downloaded files using these checksums:
+            
+            ```bash
+            # Linux
+            sha256sum sa-x86_64-unknown-linux-gnu
+            
+            # macOS
+            shasum -a 256 sa-x86_64-apple-darwin
+            shasum -a 256 sa-aarch64-apple-darwin
+            
+            # Windows (PowerShell)
+            Get-FileHash sa-x86_64-pc-windows-msvc.exe -Algorithm SHA256
+            ```
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
