@@ -100,6 +100,16 @@ sudo cp target/release/sa /usr/local/bin/
 sa version
 ```
 
+### Uninstallation
+
+To uninstall `sa`, run:
+
+```bash
+cargo uninstall sa
+```
+
+This will remove the `sa` binary from your system.
+
 ---
 
 ## 📚 **Usage Examples**
@@ -166,6 +176,8 @@ The documentation includes:
 
 | Command | Description | Example |
 |---------|-------------|---------|
+| `sa install <package>` | Install a package (like pip install) | `sa install requests` |
+| `sa uninstall <package>` | Uninstall a package (like pip uninstall) | `sa uninstall requests` |
 | `sa add <packages>` | Add packages to project | `sa add requests flask` |
 | `sa remove --package <pkg>` | Remove package | `sa remove --package flask` |
 | `sa list` | List installed packages | `sa list` |
@@ -173,6 +185,7 @@ The documentation includes:
 | `sa build` | Build project distributions | `sa build` |
 | `sa publish` | Publish to PyPI | `sa publish` |
 | `sa version` | Show version info | `sa version` |
+| `cargo uninstall sa` | Uninstall SA from system | `cargo uninstall sa` |
 
 ---
 

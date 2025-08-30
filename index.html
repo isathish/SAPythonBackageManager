@@ -819,7 +819,19 @@ sudo cp target/release/sa /usr/local/bin/</div>
         </div>
     </section>
 
-    <section class="usage" id="usage">
+    <section class="installation" id="uninstallation">
+    <div class="container">
+        <h2 class="section-title">Uninstallation</h2>
+        <p class="section-subtitle">Remove SA from your system</p>
+        <div class="code-container">
+            <div class="code-block">cargo uninstall sa
+# Removes the SA binary from your system</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+</section>
+
+<section class="usage" id="usage">
         <div class="container">
             <h2 class="section-title">Usage Examples</h2>
             <p class="section-subtitle">Common workflows made simple and intuitive</p>
@@ -848,6 +860,15 @@ sudo cp target/release/sa /usr/local/bin/</div>
                     <div class="code-container">
                         <div class="code-block">sa remove --package old-dependency
 # Clean removal with automatic dependency cleanup</div>
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                </div>
+
+                <div class="example">
+                    <h4>🗑️ Uninstall a package</h4>
+                    <div class="code-container">
+                        <div class="code-block">sa uninstall requests
+# Uninstalls the specified package from the virtual environment</div>
                         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                     </div>
                 </div>
