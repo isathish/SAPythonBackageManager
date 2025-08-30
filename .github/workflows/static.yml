@@ -1,10 +1,14 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+# Deploy SA Documentation to GitHub Pages
+name: Deploy Documentation to Pages
 
 on:
   # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
+    paths:
+      - "index.html"
+      - "docs/**"
+      - ".github/workflows/static.yml"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -31,13 +35,55 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
+      - name: Prepare documentation files
+        run: |
+          # Create a temporary directory for GitHub Pages content
+          mkdir -p _site
+          
+          # Copy the main index.html (homepage)
+          cp index.html _site/
+          
+          # Copy documentation files
+          if [ -d "docs" ]; then
+            cp -r docs/* _site/
+          fi
+          
+          # Create a simple 404 page
+          cat > _site/404.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Page Not Found - SA Documentation</title>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; text-align: center; padding: 50px; }
+              h1 { color: #667eea; }
+              a { color: #667eea; text-decoration: none; }
+              a:hover { text-decoration: underline; }
+            </style>
+          </head>
+          <body>
+            <h1>404 - Page Not Found</h1>
+            <p>The page you're looking for doesn't exist.</p>
+            <p><a href="/">← Back to SA Documentation</a></p>
+          </body>
+          </html>
+          EOF
+          
+          # List what we're deploying
+          echo "Files to be deployed:"
+          find _site -type f -exec ls -la {} \;
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: '.'
+          path: '_site'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

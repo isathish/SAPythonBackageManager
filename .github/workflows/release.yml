@@ -296,7 +296,7 @@ jobs:
             |----------|-------------|--------|------|
             | 🐧 Linux | x86_64 | `sa-x86_64-unknown-linux-gnu` | ![Size](https://img.shields.io/badge/size-calculating-blue) |
             | 🍎 macOS | Intel x86_64 | `sa-x86_64-apple-darwin` | ![Size](https://img.shields.io/badge/size-calculating-blue) |
-            | 🍎 macOS | Apple Silicon (M1/M2) | `sa-aarch64-apple-darwin` | ![Size](https://img.shields.io/badge/size-calculating-blue) |
+            | 🍎 macOS | Apple Silicon (M1/M2/M3/M4) | `sa-aarch64-apple-darwin` | ![Size](https://img.shields.io/badge/size-calculating-blue) |
             | 🪟 Windows | x86_64 | `sa-x86_64-pc-windows-msvc.exe` | ![Size](https://img.shields.io/badge/size-calculating-blue) |
             
             ### Quick Install
