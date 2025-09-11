@@ -14,8 +14,6 @@
 
 [📖 **Documentation**](https://isathish.github.io/SAPythonPackageManager/) • [🚀 **Quick Start**](#-quick-start) • [💾 **Download**](https://github.com/isathish/SAPythonPackageManager/releases/latest) • [🐛 **Report Bug**](https://github.com/isathish/SAPythonPackageManager/issues)
 
-
-
 </div>
 
 ---
